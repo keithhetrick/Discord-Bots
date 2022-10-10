@@ -44,7 +44,7 @@ client.on("messageDelete", (message) => {
   message.channel.send("Stop deleting messages!");
 });
 
-// React added to user message
+// Reactions & user moding added
 const BOT_PREFIX = "!";
 const MOD_ME_COMMAND = "mod-me";
 
