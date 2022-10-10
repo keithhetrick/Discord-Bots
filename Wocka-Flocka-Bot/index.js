@@ -1,3 +1,5 @@
+// Griz-Bot
+
 const cleverbot = require("cleverbot-free");
 const { Client, GatewayIntentBits } = require("discord.js");
 require("dotenv").config();
@@ -19,6 +21,29 @@ client.on("messageCreate", (message) => {
     message.reply("pong");
   }
 });
+
+client.on("messageDelete", (message) => {
+  message.channel.send("Stop deleting messages!");
+});
+
+// Reactions & user moding added
+const BOT_PREFIX = "!";
+const MOD_ME_COMMAND = "mod-me";
+
+client.on("messageCreate", (message) => {
+  if (message.content == "I love you my fellow humans!") {
+    message.react("🚀");
+    message.react("❤️");
+  }
+
+  if (message.content === `${BOT_PREFIX}${MOD_ME_COMMAND}`) {
+    modUser(message.member);
+  }
+});
+
+function modUser(member) {
+  member.roles.add("1029029727933055006");
+}
 
 // Cleverbot AI response & add text / res to Discord
 let conversation = [];
