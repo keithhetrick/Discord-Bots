@@ -47,6 +47,7 @@ client.on("messageDelete", (message) => {
 // Reactions & user moding added
 const BOT_PREFIX = "!";
 const MOD_ME_COMMAND = "mod-me";
+const MODERATOR = "1029029727933055006";
 
 client.on("messageCreate", (message) => {
   if (message.content == "I love you my fellow humans!") {
@@ -60,7 +61,7 @@ client.on("messageCreate", (message) => {
 });
 
 function modUser(member) {
-  member.roles.add("1029029727933055006");
+  member.roles.add(MODERATOR);
 }
 
 // Cleverbot AI response & add text / res to Discord
