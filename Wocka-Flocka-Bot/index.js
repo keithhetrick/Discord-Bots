@@ -1,4 +1,4 @@
-// Griz-Bot
+// Wocka-Flocka-Bot
 
 const cleverbot = require("cleverbot-free");
 const { Client, GatewayIntentBits } = require("discord.js");
