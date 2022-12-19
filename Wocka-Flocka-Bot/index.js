@@ -3,7 +3,15 @@
 const cleverbot = require("cleverbot-free");
 const { Client, GatewayIntentBits } = require("discord.js");
 require("dotenv").config();
-const jokes = require("./jokes.json");
+
+const { EmbedBuilder } = require("discord.js");
+
+// JSON files
+const jokes = require("./jsonFiles/jokes.json");
+const fortunes = require("./jsonFiles/fortune.json");
+const eightBall = require("./jsonFiles/8ball.json");
+const quotes = require("./jsonFiles/quotes.json");
+const facts = require("./jsonFiles/facts.json");
 
 const client = new Client({
   intents: [
@@ -58,79 +66,255 @@ function modUser(member) {
   member.roles.add(MODERATOR);
 }
 
-// style options for the !help command
-const embed = {
+// Embed option 1
+// const exampleEmbed = new EmbedBuilder()
+//   .setColor(0x0099ff)
+//   .setTitle("Some title")
+//   .setURL("https://discord.js.org/")
+//   .setAuthor({
+//     name: "Some name",
+//     iconURL: "https://i.imgur.com/AfFp7pu.png",
+//     url: "https://discord.js.org",
+//   })
+//   .setDescription("Some description here")
+//   .setThumbnail("https://i.imgur.com/AfFp7pu.png")
+//   .addFields(
+//     { name: "Regular field title", value: "Some value here" },
+//     { name: "\u200B", value: "\u200B" },
+//     { name: "Inline field title", value: "Some value here", inline: true },
+//     { name: "Inline field title", value: "Some value here", inline: true }
+//   )
+//   .addFields({
+//     name: "Inline field title",
+//     value: "Some value here",
+//     inline: true,
+//   })
+//   .setImage("https://i.imgur.com/AfFp7pu.png")
+//   .setTimestamp()
+//   .setFooter({
+//     text: "Some footer text here",
+//     iconURL: "https://i.imgur.com/AfFp7pu.png",
+//   });
+
+// channel.send({ embeds: [exampleEmbed] });
+
+// Embed option 2
+const exampleEmbed = {
+  color: 0x0099ff,
   title: "Wocka-Flocka Commands",
+  url: "https://discord.js.org",
+  author: {
+    name: "Wocka-Flocka",
+    icon_url: "https://i.imgur.com/AfFp7pu.png",
+    url: "https://discord.js.org",
+  },
   description: "List of commands for Wocka-Flocka",
-  color: 16711680,
+  thumbnail: {
+    url: "https://i.imgur.com/AfFp7pu.png",
+  },
+  // create an array of fields with current list of bot commands
+
   fields: [
-    // add an image into the fields
     {
       name: "!help",
-      value: "List of commands",
-      image: {
-        url: "https://i.imgur.com/1Gp0g3q.png",
-      },
+      value: "List of avaliable commands",
+    },
+    {
+      name: "\u200b",
+      value: "\u200b",
+      inline: false,
     },
     {
       name: "tell me a joke",
-      value: "Wocka-Flocka will tell you a joke",
+      value: "Wocka-Flocka will tell you a terrible joke",
+      inline: true,
     },
     {
-      name: "!mod-me",
-      value: "Wocka-Flocka will give you the moderator role",
-    },
-    {
-      name: "!unmod-me",
-      value: "Wocka-Flocka will remove the moderator role from you",
-    },
-    {
-      name: "ping",
-      value: "Wocka-Flocka will reply with pong",
-    },
-    {
-      name: "roll-the-dice",
-      value: "Wocka-Flocka will roll a dice",
+      name: "roll the dice",
+      value: "Wocka-Flocka will roll some dice",
+      inline: true,
     },
     {
       name: "8ball",
       value: "Wocka-Flocka will reply with an 8ball answer",
+      inline: true,
+    },
+    {
+      name: "tell me my fortune",
+      value: "Wocka-Flocka will tell you your fortune",
+      inline: true,
+    },
+    {
+      name: "flip a coin",
+      value: "Wocka Flocka flips a coin",
+      inline: true,
+    },
+    {
+      name: "rock, paper, scissors",
+      value: "Returns rock, paper, or scissors",
+      inline: true,
+    },
+    {
+      name: "inspirational quote",
+      value: "Wocka-Flocka will give you an inspirational quote",
+      inline: true,
+    },
+    {
+      name: "random fact",
+      value: "Wocka-Flocka will give you a Snapple-top level random fact",
+      inline: true,
     },
     {
       name: "pick a number",
-      value: "Wocka-Flocka will pick a number",
+      value: "Wocka-Flocka will pick a number between 1 and 100",
     },
     {
-      name: "get my avatar",
-      value: "Wocka-Flocka will reply with your avatar",
+      name: "\u200b",
+      value: "\u200b",
+      inline: false,
     },
     {
-      name: "get my ID",
-      value: "Wocka-Flocka will reply with your ID",
+      name: "HOLIDAY TRACKER",
+      value: "\u200b",
+      inline: false,
+    },
+    {
+      name: "days until christmas",
+      value: "Wocka-Flocka will tell you how many days until Christmas",
+    },
+    {
+      name: "days until halloween",
+      value: "Wocka-Flocka will tell you how many days until Halloween",
+    },
+    {
+      name: "days until new years",
+      value: "Wocka-Flocka will tell you how many days until New Years Eve",
+    },
+    {
+      name: "\u200b",
+      value: "\u200b",
+      inline: false,
     },
     {
       name: "Recommend Algorithm resources",
       value: "Wocka-Flocka will recommend Algorithm resources",
     },
     {
+      name: "Recommend Data Structures resources",
+      value: "Wocka-Flocka will recommend Data Structures resources",
+    },
+    {
+      name: "Recommend Front End Development resources",
+      value: "Wocka-Flocka will recommend Front End Development resources",
+    },
+    {
+      name: "Recommend Back End Development resources",
+      value: "Wocka-Flocka will recommend Back End Development resources",
+    },
+    {
+      name: "Recommend Full Stack Development resources",
+      value: "Wocka-Flocka will recommend Full Stack Development resources",
+    },
+    {
       name: "Recommend React resources",
       value: "Wocka-Flocka will recommend React resources",
     },
     {
-      name: "Recommend Data Structures resources",
-      value: "Wocka-Flocka will recommend Data Structures resources",
+      name: "Recommend Node resources",
+      value: "Wocka-Flocka will recommend Node resources",
     },
     {
       name: "Recommend AI resources",
       value: "Wocka-Flocka will recommend AI resources",
     },
   ],
+  image: {
+    url: "https://i.imgur.com/AfFp7pu.png",
+  },
+  timestamp: new Date().toISOString(),
+  footer: {
+    text: "Bot creator: Keith Hetrick",
+    icon_url: "https://i.imgur.com/AfFp7pu.png",
+  },
 };
+// define current channel using ID 1028135751508033676
+const channel = client.channels.cache.get("1028135751508033676");
+// channel.send({ embeds: [exampleEmbed] });
+
+// style options for the !help command
+// const embed = {
+//   title: "Wocka-Flocka Commands",
+//   description: "List of commands for Wocka-Flocka",
+//   color: 16711680,
+//   fields: [
+//     // add an image into the fields
+//     {
+//       name: "!help",
+//       value: "List of commands",
+//       image: {
+//         url: "https://i.imgur.com/1Gp0g3q.png",
+//       },
+//     },
+//     {
+//       name: "tell me a joke",
+//       value: "Wocka-Flocka will tell you a joke",
+//     },
+//     {
+//       name: "!mod-me",
+//       value: "Wocka-Flocka will give you the moderator role",
+//     },
+//     {
+//       name: "!unmod-me",
+//       value: "Wocka-Flocka will remove the moderator role from you",
+//     },
+//     {
+//       name: "ping",
+//       value: "Wocka-Flocka will reply with pong",
+//     },
+//     {
+//       name: "roll-the-dice",
+//       value: "Wocka-Flocka will roll a dice",
+//     },
+//     {
+//       name: "8ball",
+//       value: "Wocka-Flocka will reply with an 8ball answer",
+//     },
+//     {
+//       name: "pick a number",
+//       value: "Wocka-Flocka will pick a number",
+//     },
+//     {
+//       name: "get my avatar",
+//       value: "Wocka-Flocka will reply with your avatar",
+//     },
+//     {
+//       name: "get my ID",
+//       value: "Wocka-Flocka will reply with your ID",
+//     },
+//     {
+//       name: "Recommend Algorithm resources",
+//       value: "Wocka-Flocka will recommend Algorithm resources",
+//     },
+//     {
+//       name: "Recommend React resources",
+//       value: "Wocka-Flocka will recommend React resources",
+//     },
+//     {
+//       name: "Recommend Data Structures resources",
+//       value: "Wocka-Flocka will recommend Data Structures resources",
+//     },
+//     {
+//       name: "Recommend AI resources",
+//       value: "Wocka-Flocka will recommend AI resources",
+//     },
+//   ],
+// };
 
 // call the !help command to get a list of commands
 client.on("messageCreate", (message) => {
   if (message.content === "!help") {
-    message.reply({ embeds: [embed] });
+    // message.reply({ embeds: [embed] });
+    message.reply({ embeds: [exampleEmbed] });
   }
 });
 
@@ -165,32 +349,120 @@ client.login(process.env.TOKEN);
 // ======================================================== //
 // ======================================================== //
 
-// Welcome new members to the server
-client.on("guildMemberAdd", (member) => {
-  member.guild.channels.cache
-    .get("835704869210083389")
-    .send(`Welcome to the server, ${member}`);
-});
+// Welcome message to new members to the server
+// create manually welcome command for below message
+// client.on("guildMemberAdd", (member) => {
+//   member.guild.channels.cache
+//     .get("1028135751508033676")
+//     .send(`Welcome to the server, ${member}`);
+// });
 
-// Send a message to a specific channel
+// add users name to the welcome message
+
+// const welcomeEmbed = {
+//   color: 3447003,
+//   title: "Welcome to the server!",
+//   description: "We're so glad you're here. 🚀",
+//   fields: [
+//     {
+//       name: "Please read the rules",
+//       value: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+//     },
+//     {
+//       name: "Please introduce yourself",
+//       value: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+//     },
+//   ],
+//   timestamp: new Date(),
+//   footer: {
+//     text: "Wocka-Flocka",
+//     icon_url: "https://i.imgur.com/AfFp7pu.png",
+//   },
+// };
+
+// manualy call the above welcome message witha command
+// client.on("messageCreate", (message) => {
+//   if (message.content === "!welcome") {
+//     message.reply({ embeds: [welcomeEmbed] });
+//   }
+// });
+
+// client.on("guildMemberAdd", (member) => {
+//   member.guild.channels.cache.get("1028135751508033676").send({
+//     embeds: [
+//       {
+//         title: `Welcome to the server, ${member}`,
+//         description: "We're so glad you're here. 🚀",
+//         fields: [
+//           {
+//             name: "Please read the rules",
+//             value: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+//           },
+//           {
+//             name: "Please introduce yourself",
+//             value: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+//           },
+//         ],
+//         timestamp: new Date(),
+//         footer: {
+//           text: "Wocka-Flocka",
+//           icon_url: "https://i.imgur.com/AfFp7pu.png",
+//         },
+//       },
+//     ],
+//   });
+// });
+
+// show username in welcome message
 client.on("messageCreate", (message) => {
-  if (message.content === "Send a message to a specific channel") {
-    client.channels.cache.get("835704869210083389").send("Hello! 🚀");
+  if (message.content === "!welcome") {
+    message.reply({
+      embeds: [
+        {
+          title: `Welcome to the server, ${message.author.username}`,
+          description: "We're so glad you're here. 🚀",
+          fields: [
+            {
+              name: "Please read the rules",
+              value: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            },
+            {
+              name: "Please introduce yourself",
+              value: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            },
+          ],
+          timestamp: new Date(),
+          footer: {
+            text: "Wocka-Flocka",
+            icon_url: "https://i.imgur.com/AfFp7pu.png",
+          },
+        },
+      ],
+    });
+  }
+
+  // Send a message to a specific channel
+  if (message.content === "Send a message to channel") {
+    client.channels.cache.get("1054444166664429639").send("Hello! 🚀");
   }
   // Send a message to a DM channel
-  if (message.content === "Send a message to a DM channel") {
+  if (message.content === "Send message to DM") {
     message.author.send("Hello! 🚀");
   }
 
   // Get list of members in the server
-  if (message.content === "Get list of members in the server") {
-    client.guilds.cache
-      .get("835704869210083386")
-      .members.fetch()
-      .then((res) => {
-        console.log(res);
-        message.reply(res);
-      });
+  if (message.content === "Get list of current members") {
+    // fetch all current members in the server
+    const list = client.guilds.cache.get("1028135751508033676");
+
+    list.members.cache.forEach((member) => {
+      console.log(member.user.username);
+    });
+
+    // total number of members in the server
+    const members = list.members.cache;
+    message.author.send(`Total members: ${members.size}`);
+    console.log(`Total members: ${members.size}`);
   }
 });
 
@@ -200,16 +472,14 @@ client.on("messageCreate", (message) => {
 // ======================================================== //
 // ======================================================== //
 
-// "Pick a number" command
 client.on("messageCreate", (message) => {
+  // "Pick a number" command
   if (message.content === "pick a number") {
-    const randomNum = Math.floor(Math.random() * 100);
-    message.reply(`I pick the number ${Math.floor(Math.random() * 100) + 1}!`);
+    const randomNum = Math.floor(Math.random() * 100 + 1);
+    message.reply(`I pick the number ${randomNum}!`);
   }
-});
 
-// "Roll the dice" command
-client.on("messageCreate", (message) => {
+  // "Roll the dice" command
   if (message.content === "roll the dice") {
     const diceRoll1 = Math.floor(Math.random() * 6) + 1;
     const diceRoll2 = Math.floor(Math.random() * 6) + 1;
@@ -228,48 +498,170 @@ client.on("messageCreate", (message) => {
       message.reply("Bang bang 🔫 Jesse James's .45, You rolled 9");
     } else message.reply(`You rolled a ${randomNumber}`);
   }
-});
 
-// 8 BALL GAME
-client.on("messageCreate", (message) => {
+  // "8ball" command
   if (message.content === "8ball") {
-    message.reply(
-      `The 8 ball says: ${
-        eightBall[Math.floor(Math.random() * eightBall.length)]
-      }`
-    );
+    // 8ball responses come from json file
+    const randomEightBall =
+      eightBall[Math.floor(Math.random() * eightBall.length)];
+    message.reply(`The 8 ball says: ${randomEightBall}`);
   }
-});
 
-const eightBall = [
-  "It is certain",
-  "It is decidedly so",
-  "Without a doubt",
-  "Yes definitely",
-  "You may rely on it",
-  "As I see it, yes",
-  "Most likely",
-  "Outlook good",
-  "Yes",
-  "Signs point to yes",
-  "Reply hazy try again",
-  "Ask again later",
-  "Better not tell you now",
-  "Cannot predict now",
-  "Concentrate and ask again",
-  "Don't count on it",
-  "My reply is no",
-  "My sources say no",
-  "Outlook not so good",
-  "Very doubtful",
-];
-
-// "Tell me a joke" command
-client.on("messageCreate", (message) => {
+  // "Tell me a joke" command
   if (message.content === "tell me a joke") {
     // jokes come from json file
     const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
     message.reply(randomJoke);
+  }
+
+  // "Tell me my fortune" command
+  if (message.content === "tell me my fortune") {
+    // fortunes come from json file
+    const randomFortune = fortunes[Math.floor(Math.random() * fortunes.length)];
+    message.reply(`Fortune teller says: ${randomFortune}`);
+  }
+
+  // "Flip a coin" command
+  if (message.content === "flip a coin") {
+    const coinFlip = Math.floor(Math.random() * 2) + 1;
+    if (coinFlip === 1) {
+      message.reply("Heads 🪙");
+    } else if (coinFlip === 2) {
+      message.reply("Tails 🪙");
+    }
+  }
+
+  // "Rock, paper, scissors" command
+  if (message.content === "rock, paper, scissors") {
+    const rockPaperScissors = Math.floor(Math.random() * 3) + 1;
+    if (rockPaperScissors === 1) {
+      message.reply("Rock 🪨");
+    } else if (rockPaperScissors === 2) {
+      message.reply("Paper 📰");
+    } else if (rockPaperScissors === 3) {
+      message.reply("Scissors ✂️");
+    }
+  }
+
+  // share inspirational quote
+  if (message.content === "inspirational quote") {
+    // quotes come from json file
+    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+    message.reply(`"${randomQuote.quoteText}" - ${randomQuote.quoteAuthor}`);
+  }
+
+  // random fact generator
+  if (message.content === "random fact") {
+    // facts come from json file
+    const randomFact = facts[Math.floor(Math.random() * facts.length)];
+    message.reply(randomFact);
+  }
+
+  // ======================================================== //
+  // ======================================================== //
+  // HOLIDAY COUNTDOWNS
+  // ======================================================== //
+  // ======================================================== //
+
+  // "aays until christmas" command
+  if (message.content === "days until christmas") {
+    const today = new Date();
+    const nextChristmas = new Date(today.getFullYear(), 11, 25);
+    if (today.getMonth() === 11 && today.getDate() > 25) {
+      nextChristmas.setFullYear(nextChristmas.getFullYear() + 1);
+    }
+    const oneDay = 1000 * 60 * 60 * 24;
+    const daysUntilChristmas = Math.ceil(
+      (nextChristmas.getTime() - today.getTime()) / oneDay
+    );
+    message.reply(`There are ${daysUntilChristmas} days until Christmas!`);
+  }
+
+  // days until new years
+  if (message.content === "days until new years") {
+    const today = new Date();
+    const nextNewYears = new Date(today.getFullYear(), 11, 31);
+    if (today.getMonth() === 11 && today.getDate() > 31) {
+      nextNewYears.setFullYear(nextNewYears.getFullYear() + 1);
+    }
+    const oneDay = 1000 * 60 * 60 * 24;
+    const daysUntilNewYears = Math.ceil(
+      (nextNewYears.getTime() - today.getTime()) / oneDay
+    );
+    message.reply(`There are ${daysUntilNewYears} days until New Years!`);
+  }
+
+  // get current date
+  if (message.content === "what is the date") {
+    const today = new Date();
+    const date = today.getDate();
+    const month = today.getMonth() + 1;
+    const year = today.getFullYear();
+    message.reply(`Today is ${month}/${date}/${year}`);
+  }
+
+  // days until valentines day
+
+  // // Automate Quote of the day that happens every 24 hours
+  // const schedule = require("node-schedule");
+  // const rule = new schedule.RecurrenceRule();
+  // rule.hour = 0;
+  // rule.minute = 0;
+  // rule.second = 0;
+  // const job = schedule.scheduleJob(rule, function () {
+  //   const quoteOfTheDay = quotes[Math.floor(Math.random() * quotes.length)];
+  //   client.channels.cache
+  //     .get("CHANNEL ID")
+  //     .send(`"${quoteOfTheDay.quoteText}" - ${quoteOfTheDay.quoteAuthor}`);
+  // });
+
+  // // Alt automated quote of the day
+  // const quoteOfTheDay = () => {
+  //   const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+  //   return randomQuote;
+  // };
+
+  // // set up schedule for quote of the day
+  // const schedule = require("node-schedule");
+  // const rule = new schedule.RecurrenceRule();
+  // rule.dayOfWeek = [0, new schedule.Range(0, 6)];
+  // rule.hour = 0;
+  // rule.minute = 0;
+
+  // schedule.scheduleJob(rule, function () {
+  //   console.log("The answer to life, the universe, and everything!");
+  //   client.channels.cache.get("CHANNEL_ID").send(quoteOfTheDay());
+  // });
+});
+
+// MUSIC BOT
+
+client.on("messageCreate", async (message) => {
+  if (message.content === "play music") {
+    // check if user is in a voice channel
+    if (!message.member.voice.channel) {
+      message.reply("You need to be in a voice channel to play music!");
+      return;
+    }
+
+    // check if bot is already in a voice channel
+    if (message.guild.me.voice.channel) {
+      message.reply("I'm already in a voice channel!");
+      return;
+    }
+
+    // join user's voice channel
+    message.member.voice.channel.join().then((connection) => {
+      // play music
+      const stream = ytdl("https://www.youtube.com/watch?v=7vKp_hY9q3c", {
+        filter: "audioonly",
+      });
+      const dispatcher = connection.play(stream);
+
+      dispatcher.on("finish", () => {
+        message.member.voice.channel.leave();
+      });
+    });
   }
 });
 

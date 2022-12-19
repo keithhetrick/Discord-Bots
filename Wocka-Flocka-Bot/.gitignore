@@ -1,2 +1,7 @@
 .env
 node_modules
+orphanCode
+
+# JSON files
+jsonFiles
+*.json
