@@ -666,25 +666,58 @@ client.on("messageCreate", (message) => {
       });
   }
 
-  // get current weather
-  if (message.content === "current weather") {
-    const ip = require("ip");
-    const ipLocation = require("ip2location-nodejs");
-    const ipAddress = ip.address();
-    const ipInfo = new ipLocation.IP2Location(ipAddress);
-    const city = ipInfo.city;
-    const state = ipInfo.region;
-    const country = ipInfo.countryName;
-    const weather = require("weather-js");
-    const location = `${city}, ${state}, ${country}`;
-    weather.find({ search: location, degreeType: "F" }, function (err, result) {
-      if (err) message.reply(err);
-      message.reply(
-        `The current weather in ${location} is ${result[0].current.skytext} with a temperature of ${result[0].current.temperature} degrees`
-      );
-    });
+  // get IP addreww & return current weather using the IP information
+  if (message.content === "what is the weather like") {
+    const axios = require("axios");
+    axios
+      .get(
+        "https://ipgeolocation.abstractapi.com/v1/?api_key=433722e6c1e640499d7284bdceb6fedc"
+      )
+      .then((response) => {
+        // make response data object a string
+        function stringify(response) {
+          return JSON.stringify(response);
+        }
+        // pass new stringified response data object to a variable
+        const responseData = stringify(response.data);
+
+        console.log("LOCATION RESPONSE DATA: " + responseData);
+        const city = response.data.city;
+        const region = response.data.region;
+        const country = response.data.country;
+        const latitude = response.data.latitude;
+        const longitude = response.data.longitude;
+        axios
+          .get(
+            `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=45b75321eb653d4c02fcc9fc0bdd843c`
+          )
+          .then((response) => {
+            // make response data object a string
+            function stringify(response) {
+              return JSON.stringify(response);
+            }
+            // pass new stringified response data object to a variable
+            const resData = stringify(response.data);
+
+            console.log("WEATHER RESPONSE DATA: " + resData);
+            const currentWeather = response.data.weather;
+            // console.log("CURRENT WEATHER: " + currentWeather);
+            const currentTemp = response.data.temp;
+            const currentFeelsLike = response.data.feels_like;
+            const currentWindSpeed = response.data.wind_speed;
+            const currentHumidity = response.data.humidity;
+            message.reply(
+              `The current weather in ${city}, ${region}, ${country} is ${currentWeather} with a temperature of ${currentTemp}°F, but it feels like ${currentFeelsLike}°F. The wind speed is ${currentWindSpeed} MPH with a humidity of ${currentHumidity}%.`
+            );
+          })
+          .catch((error) => {
+            console.log("ERROR: " + error);
+          });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
-  // }
 
   // // Automate Quote of the day that happens every 24 hours
   // const schedule = require("node-schedule");
