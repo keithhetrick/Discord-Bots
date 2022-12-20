@@ -91,7 +91,6 @@ const exampleEmbed = {
     url: "https://i.imgur.com/AfFp7pu.png",
   },
   // create an array of fields with current list of bot commands
-
   fields: [
     {
       name: "!help",
@@ -174,6 +173,24 @@ const exampleEmbed = {
       inline: false,
     },
     {
+      name: "WEATHER, TIME & LOCATION TRACKER",
+      value: "\u200b",
+      inline: false,
+    },
+    {
+      name: "what is the weather like",
+      value: "Wocka-Flocka will tell you the weather",
+    },
+    {
+      name: "what time is it in EST/CST/MST/PST",
+      value: "Wocka-Flocka will tell you the time in EST/CST/MST/PST",
+    },
+    {
+      name: "\u200b",
+      value: "\u200b",
+      inline: false,
+    },
+    {
       name: "Recommend Algorithm resources",
       value: "Wocka-Flocka will recommend Algorithm resources",
     },
@@ -218,75 +235,6 @@ const exampleEmbed = {
 // define current channel using ID 1028135751508033676
 const channel = client.channels.cache.get("1028135751508033676");
 // channel.send({ embeds: [exampleEmbed] });
-
-// style options for the !help command
-// const embed = {
-//   title: "Wocka-Flocka Commands",
-//   description: "List of commands for Wocka-Flocka",
-//   color: 16711680,
-//   fields: [
-//     // add an image into the fields
-//     {
-//       name: "!help",
-//       value: "List of commands",
-//       image: {
-//         url: "https://i.imgur.com/1Gp0g3q.png",
-//       },
-//     },
-//     {
-//       name: "tell me a joke",
-//       value: "Wocka-Flocka will tell you a joke",
-//     },
-//     {
-//       name: "!mod-me",
-//       value: "Wocka-Flocka will give you the moderator role",
-//     },
-//     {
-//       name: "!unmod-me",
-//       value: "Wocka-Flocka will remove the moderator role from you",
-//     },
-//     {
-//       name: "ping",
-//       value: "Wocka-Flocka will reply with pong",
-//     },
-//     {
-//       name: "roll-the-dice",
-//       value: "Wocka-Flocka will roll a dice",
-//     },
-//     {
-//       name: "8ball",
-//       value: "Wocka-Flocka will reply with an 8ball answer",
-//     },
-//     {
-//       name: "pick a number",
-//       value: "Wocka-Flocka will pick a number",
-//     },
-//     {
-//       name: "get my avatar",
-//       value: "Wocka-Flocka will reply with your avatar",
-//     },
-//     {
-//       name: "get my ID",
-//       value: "Wocka-Flocka will reply with your ID",
-//     },
-//     {
-//       name: "Recommend Algorithm resources",
-//       value: "Wocka-Flocka will recommend Algorithm resources",
-//     },
-//     {
-//       name: "Recommend React resources",
-//       value: "Wocka-Flocka will recommend React resources",
-//     },
-//     {
-//       name: "Recommend Data Structures resources",
-//       value: "Wocka-Flocka will recommend Data Structures resources",
-//     },
-//     {
-//       name: "Recommend AI resources",
-//       value: "Wocka-Flocka will recommend AI resources",
-//     },
-//   ],
-// };
 
 // call the !help command to get a list of commands
 client.on("messageCreate", (message) => {
@@ -588,39 +536,37 @@ client.on("messageCreate", (message) => {
 
   // get time in EST
   if (message.content === "what time is it in EST") {
-    // get current time in EST
     const estTime = new Date().toLocaleString("en-US", {
       timeZone: "America/New_York",
     });
     message.reply(`It is currently ${estTime} in EST`);
   }
 
+  // get time in CST
+  if (message.content === "what time is it in CST") {
+    const cstTime = new Date().toLocaleString("en-US", {
+      timeZone: "America/Chicago",
+    });
+    message.reply(`It is currently ${cstTime} in CST`);
+  }
+
   // get time in PST
   if (message.content === "what time is it in PST") {
-    // get current time in PST
     const pstTime = new Date().toLocaleString("en-US", {
       timeZone: "America/Los_Angeles",
     });
     message.reply(`It is currently ${pstTime} in PST`);
   }
 
-  // get time in GMT
-  if (message.content === "what time is it in GMT") {
-    // get current time in GMT
-    const gmtTime = new Date().toLocaleString("en-US", {
-      timeZone: "Europe/London",
+  // get time in MST
+  if (message.content === "what time is it in MST") {
+    const mstTime = new Date().toLocaleString("en-US", {
+      timeZone: "America/Denver",
     });
-    message.reply(`It is currently ${gmtTime} in GMT`);
+    message.reply(`It is currently ${mstTime} in MST`);
   }
 
   // show users ip address in a message
-  if (message.content === "what is my ip address") {
-    const ip = require("ip");
-    const ipAddress = ip.address();
-    message.reply(`Your IP address is ${ipAddress}`);
-  }
-
-  // manually call axios request above
   if (message.content === "where is my ip address located") {
     const axios = require("axios");
     axios
@@ -656,14 +602,19 @@ client.on("messageCreate", (message) => {
             `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}&units=imperial`
           )
           .then((response) => {
-            console.log("WEATHER RESPONSE DATA: " + response.data.weather);
-            const currentWeather = response.data.weather;
+            console.log(
+              "WEATHER RESPONSE DATA: " + response.data.weather[0].main
+            );
+            const currentWeatherMain = response.data.weather[0].main;
+            const currentWeatherDescription =
+              response.data.weather[0].description;
             const currentTemp = response.data.main.temp;
             const currentFeelsLike = response.data.main.feels_like;
             const currentWindSpeed = response.data.wind.speed;
             const currentHumidity = response.data.main.humidity;
+            const currentClouds = response.data.clouds.all;
             message.reply(
-              `The current weather in ${city}, ${region}, ${country} is ${currentWeather} with a temperature of ${currentTemp} °F, but it feels like ${currentFeelsLike} °F. The wind speed is ${currentWindSpeed} MPH with a humidity of ${currentHumidity}%. `
+              `The current weather in ${city}, ${region}, ${country} is: ${currentWeatherMain} & ${currentWeatherDescription}, with a temperature of ${currentTemp} °F and a real-feel of ${currentFeelsLike} °F. The wind speed is ${currentWindSpeed} MPH with a humidity of ${currentHumidity}% and a cloudiness of ${currentClouds}%. `
             );
           })
           .catch((error) => {
@@ -705,37 +656,6 @@ client.on("messageCreate", (message) => {
   //   console.log("The answer to life, the universe, and everything!");
   //   client.channels.cache.get("CHANNEL_ID").send(quoteOfTheDay());
   // });
-});
-
-// MUSIC BOT
-
-client.on("messageCreate", async (message) => {
-  if (message.content === "play music") {
-    // check if user is in a voice channel
-    if (!message.member.voice.channel) {
-      message.reply("You need to be in a voice channel to play music!");
-      return;
-    }
-
-    // check if bot is already in a voice channel
-    if (message.guild.me.voice.channel) {
-      message.reply("I'm already in a voice channel!");
-      return;
-    }
-
-    // join user's voice channel
-    message.member.voice.channel.join().then((connection) => {
-      // play music
-      const stream = ytdl("https://www.youtube.com/watch?v=7vKp_hY9q3c", {
-        filter: "audioonly",
-      });
-      const dispatcher = connection.play(stream);
-
-      dispatcher.on("finish", () => {
-        message.member.voice.channel.leave();
-      });
-    });
-  }
 });
 
 // ======================================================== //
