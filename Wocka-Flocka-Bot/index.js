@@ -10,6 +10,7 @@
 const cleverbot = require("cleverbot-free");
 const { Client, GatewayIntentBits, EmbedBuilder } = require("discord.js");
 require("dotenv").config();
+const axios = require("axios");
 
 // JSON files
 const jokes = require("./jsonFiles/jokes.json");
@@ -17,7 +18,6 @@ const fortunes = require("./jsonFiles/fortune.json");
 const eightBall = require("./jsonFiles/8ball.json");
 const quotes = require("./jsonFiles/quotes.json");
 const facts = require("./jsonFiles/facts.json");
-// const { IP2Location } = require("ip2location-nodejs");
 
 // API keys
 const WEATHER_API_KEY = process.env.OPEN_WEATHER_API_KEY;
@@ -45,29 +45,32 @@ const MOD_ME_COMMAND = "mod-me";
 const MODERATOR = "1029029727933055006";
 
 client.on("messageCreate", (message) => {
+  // covert all text inputs to lowercase
+  const msg = message.content.toLowerCase();
+
   // "ping" command
   if (message.content === "ping") {
     message.reply("pong");
   }
 
   // "I love you my fellow humans!" command
-  if (message.content == "I love you my fellow humans!") {
+  if (msg == "I love you my fellow humans!") {
     message.react("🚀");
     message.react("❤️");
   }
 
   // "Who is the best bot?" command
-  if (message.content === "Who is the best bot?") {
+  if (msg === "Who is the best bot?") {
     message.reply("Wocka-Flocka is the best bot! 😉😂🚀");
   }
 
   // Mod user command
-  if (message.content === `${BOT_PREFIX}${MOD_ME_COMMAND}`) {
+  if (msg === `${BOT_PREFIX}${MOD_ME_COMMAND}`) {
     modUser(message.member);
   }
 
   // undo "mod-me" command (remove moderator role)
-  if (message.content === `!un${MOD_ME_COMMAND}`) {
+  if (msg === `!un${MOD_ME_COMMAND}`) {
     message.member.roles.remove(MODERATOR);
   }
 });
@@ -77,7 +80,7 @@ function modUser(member) {
 }
 
 // Embeded message
-const exampleEmbed = {
+const helpMessageEmbed = {
   color: 0x0099ff,
   title: "Wocka-Flocka Commands",
   url: "https://discord.js.org",
@@ -91,6 +94,8 @@ const exampleEmbed = {
     url: "https://i.imgur.com/AfFp7pu.png",
   },
   // create an array of fields with current list of bot commands
+  // add colors to the field names in the embed
+
   fields: [
     {
       name: "!help",
@@ -103,22 +108,22 @@ const exampleEmbed = {
     },
     {
       name: "tell me a joke",
-      value: "Wocka-Flocka will tell you a terrible joke",
+      value: "Dad joke or rad joke? Their goos because their terrible",
       inline: true,
     },
     {
       name: "roll the dice",
-      value: "Wocka-Flocka will roll some dice",
+      value: "Oh CRAPS, let's roll some dice",
       inline: true,
     },
     {
       name: "8ball",
-      value: "Wocka-Flocka will reply with an 8ball answer",
+      value: "Replies with an 8ball answer",
       inline: true,
     },
     {
       name: "tell me my fortune",
-      value: "Wocka-Flocka will tell you your fortune",
+      value: "Wocka-Flocka sees your future & will tell you your fortune",
       inline: true,
     },
     {
@@ -128,7 +133,7 @@ const exampleEmbed = {
     },
     {
       name: "rock, paper, scissors",
-      value: "Returns rock, paper, or scissors",
+      value: "Ro-sham-bo! Let's you play rock, paper, or scissors",
       inline: true,
     },
     {
@@ -138,12 +143,12 @@ const exampleEmbed = {
     },
     {
       name: "random fact",
-      value: "Wocka-Flocka will give you a Snapple-top level random fact",
+      value: "How about a Snapple-cap level random fact?",
       inline: true,
     },
     {
       name: "pick a number",
-      value: "Wocka-Flocka will pick a number between 1 and 100",
+      value: "Wocka-Flocka can't pick your nose, but it can pick a number",
     },
     {
       name: "\u200b",
@@ -157,15 +162,15 @@ const exampleEmbed = {
     },
     {
       name: "days until christmas",
-      value: "Wocka-Flocka will tell you how many days until Christmas",
+      value: "Tells you how many days until Christmas",
     },
     {
       name: "days until halloween",
-      value: "Wocka-Flocka will tell you how many days until Halloween",
+      value: "Tells you how many days until Halloween",
     },
     {
       name: "days until new years",
-      value: "Wocka-Flocka will tell you how many days until New Years Eve",
+      value: "Tells you how many days until New Years Eve",
     },
     {
       name: "\u200b",
@@ -173,7 +178,7 @@ const exampleEmbed = {
       inline: false,
     },
     {
-      name: "WEATHER, TIME & LOCATION TRACKER",
+      name: "WEATHER, TIME ZONE & LOCATION TRACKER",
       value: "\u200b",
       inline: false,
     },
@@ -182,8 +187,8 @@ const exampleEmbed = {
       value: "Wocka-Flocka will tell you the weather",
     },
     {
-      name: "what time is it in EST/CST/MST/PST",
-      value: "Wocka-Flocka will tell you the time in EST/CST/MST/PST",
+      name: "what time is it in EST/CST/MST/PST (pick one)",
+      value: "Wocka-Flocka will tell you the time in the selected time zone",
     },
     {
       name: "\u200b",
@@ -232,15 +237,15 @@ const exampleEmbed = {
     icon_url: "https://i.imgur.com/AfFp7pu.png",
   },
 };
-// define current channel using ID 1028135751508033676
 const channel = client.channels.cache.get("1028135751508033676");
-// channel.send({ embeds: [exampleEmbed] });
+// channel.send({ embeds: [helpMessageEmbed] });
 
 // call the !help command to get a list of commands
-client.on("messageCreate", (message) => {
-  if (message.content === "!help") {
-    // message.reply({ embeds: [embed] });
-    message.reply({ embeds: [exampleEmbed] });
+client.on("messageCreate", async (message) => {
+  const msg = message.content.toLowerCase();
+
+  if (msg === "!help") {
+    await message.reply({ embeds: [helpMessageEmbed] });
   }
 });
 
@@ -255,7 +260,7 @@ let conversation = [];
 client.on("messageCreate", (message) => {
   if (message.author.bot) return false;
   if (message.mentions.has(client.user.id)) {
-    let text = message.content;
+    let text = msg;
     text = text.substring(text.indexOf(">") + 2, text.length);
     console.log(text);
 
@@ -308,7 +313,7 @@ client.login(process.env.TOKEN);
 
 // manualy call the above welcome message witha command
 // client.on("messageCreate", (message) => {
-//   if (message.content === "!welcome") {
+//   if (msg === "!welcome") {
 //     message.reply({ embeds: [welcomeEmbed] });
 //   }
 // });
@@ -341,7 +346,9 @@ client.login(process.env.TOKEN);
 
 // show username in welcome message
 client.on("messageCreate", (message) => {
-  if (message.content === "!welcome") {
+  const msg = message.content.toLowerCase();
+
+  if (msg === "!welcome") {
     message.reply({
       embeds: [
         {
@@ -368,16 +375,16 @@ client.on("messageCreate", (message) => {
   }
 
   // Send a message to a specific channel
-  if (message.content === "Send a message to channel") {
+  if (msg === "Send a message to channel") {
     client.channels.cache.get("1054444166664429639").send("Hello! 🚀");
   }
   // Send a message to a DM channel
-  if (message.content === "Send message to DM") {
+  if (msg === "Send message to DM") {
     message.author.send("Hello! 🚀");
   }
 
   // Get list of members in the server
-  if (message.content === "Get list of current members") {
+  if (msg === "Get list of current members") {
     // fetch all current members in the server
     const list = client.guilds.cache.get("1028135751508033676");
 
@@ -399,14 +406,16 @@ client.on("messageCreate", (message) => {
 // ======================================================== //
 
 client.on("messageCreate", (message) => {
+  const msg = message.content.toLowerCase();
+
   // "Pick a number" command
-  if (message.content === "pick a number") {
+  if (msg === "pick a number") {
     const randomNum = Math.floor(Math.random() * 100 + 1);
     message.reply(`I pick the number ${randomNum}!`);
   }
 
   // "Roll the dice" command
-  if (message.content === "roll the dice") {
+  if (msg === "roll the dice") {
     const diceRoll1 = Math.floor(Math.random() * 6) + 1;
     const diceRoll2 = Math.floor(Math.random() * 6) + 1;
     const randomNumber = diceRoll1 + diceRoll2;
@@ -426,7 +435,7 @@ client.on("messageCreate", (message) => {
   }
 
   // "8ball" command
-  if (message.content === "8ball") {
+  if (msg === "8ball") {
     // 8ball responses come from json file
     const randomEightBall =
       eightBall[Math.floor(Math.random() * eightBall.length)];
@@ -434,21 +443,21 @@ client.on("messageCreate", (message) => {
   }
 
   // "Tell me a joke" command
-  if (message.content === "tell me a joke") {
+  if (msg === "tell me a joke") {
     // jokes come from json file
     const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
     message.reply(randomJoke);
   }
 
   // "Tell me my fortune" command
-  if (message.content === "tell me my fortune") {
+  if (msg === "tell me my fortune") {
     // fortunes come from json file
     const randomFortune = fortunes[Math.floor(Math.random() * fortunes.length)];
     message.reply(`Fortune teller says: ${randomFortune}`);
   }
 
   // "Flip a coin" command
-  if (message.content === "flip a coin") {
+  if (msg === "flip a coin") {
     const coinFlip = Math.floor(Math.random() * 2) + 1;
     if (coinFlip === 1) {
       message.reply("Heads 🪙");
@@ -458,7 +467,7 @@ client.on("messageCreate", (message) => {
   }
 
   // "Rock, paper, scissors" command
-  if (message.content === "rock, paper, scissors") {
+  if (msg === "rock, paper, scissors") {
     const rockPaperScissors = Math.floor(Math.random() * 3) + 1;
     if (rockPaperScissors === 1) {
       message.reply("Rock 🪨");
@@ -470,14 +479,14 @@ client.on("messageCreate", (message) => {
   }
 
   // share inspirational quote
-  if (message.content === "inspirational quote") {
+  if (msg === "inspirational quote") {
     // quotes come from json file
     const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
     message.reply(`"${randomQuote.quoteText}" - ${randomQuote.quoteAuthor}`);
   }
 
   // random fact generator
-  if (message.content === "random fact") {
+  if (msg === "random fact") {
     // facts come from json file
     const randomFact = facts[Math.floor(Math.random() * facts.length)];
     message.reply(randomFact);
@@ -490,7 +499,7 @@ client.on("messageCreate", (message) => {
   // ======================================================== //
 
   // "aays until christmas" command
-  if (message.content === "days until christmas") {
+  if (msg === "days until christmas") {
     const today = new Date();
     const nextChristmas = new Date(today.getFullYear(), 11, 25);
     if (today.getMonth() === 11 && today.getDate() > 25) {
@@ -503,8 +512,8 @@ client.on("messageCreate", (message) => {
     message.reply(`There are ${daysUntilChristmas} days until Christmas!`);
   }
 
-  // days until new years
-  if (message.content === "days until new years") {
+  // "days until new years" command
+  if (msg === "days until new years") {
     const today = new Date();
     const nextNewYears = new Date(today.getFullYear(), 11, 31);
     if (today.getMonth() === 11 && today.getDate() > 31) {
@@ -514,13 +523,105 @@ client.on("messageCreate", (message) => {
     const daysUntilNewYears = Math.ceil(
       (nextNewYears.getTime() - today.getTime()) / oneDay
     );
-    message.reply(`There are ${daysUntilNewYears} days until New Years!`);
+    message.reply(`There are ${daysUntilNewYears} days until New Years Eve!`);
   }
 
-  // days until valentines day
+  // "days until valentines" command
+  if (msg === "days until valentines") {
+    const today = new Date();
+    const nextValentinesDay = new Date(today.getFullYear(), 1, 14);
+    if (today.getMonth() === 1 && today.getDate() > 14) {
+      nextValentinesDay.setFullYear(nextValentinesDay.getFullYear() + 1);
+    }
+    const oneDay = 1000 * 60 * 60 * 24;
+    const daysUntilValentinesDay = Math.ceil(
+      365 + (nextValentinesDay.getTime() - today.getTime()) / oneDay
+    );
+    message.reply(
+      `There are ${daysUntilValentinesDay} days until Valentines Day!`
+    );
+  }
+
+  // "days until halloween" command
+  if (msg === "days until halloween") {
+    const today = new Date();
+    const nextHalloween = new Date(today.getFullYear(), 9, 31);
+    if (today.getMonth() === 9 && today.getDate() > 31) {
+      nextHalloween.setFullYear(nextHalloween.getFullYear() + 1);
+    }
+    const oneDay = 1000 * 60 * 60 * 24;
+    const daysUntilHalloween = Math.ceil(
+      365 + (nextHalloween.getTime() - today.getTime()) / oneDay
+    );
+    message.reply(`There are ${daysUntilHalloween} days until Halloween!`);
+  }
+
+  // "days until thanksgiving" command
+  if (msg === "days until thanksgiving") {
+    const today = new Date();
+    const nextThanksgiving = new Date(today.getFullYear(), 10, 26);
+    if (today.getMonth() === 10 && today.getDate() > 26) {
+      nextThanksgiving.setFullYear(nextThanksgiving.getFullYear() + 1);
+    }
+    const oneDay = 1000 * 60 * 60 * 24;
+    const daysUntilThanksgiving = Math.ceil(
+      365 + (nextThanksgiving.getTime() - today.getTime()) / oneDay
+    );
+    message.reply(
+      `There are ${daysUntilThanksgiving} days until Thanksgiving!`
+    );
+  }
+
+  // "days until easter" command
+  if (msg === "days until easter") {
+    const today = new Date();
+    const nextEaster = new Date(today.getFullYear(), 3, 4);
+    if (today.getMonth() === 3 && today.getDate() > 4) {
+      nextEaster.setFullYear(nextEaster.getFullYear() + 1);
+    }
+    const oneDay = 1000 * 60 * 60 * 24;
+    const daysUntilEaster = Math.ceil(
+      365 + (nextEaster.getTime() - today.getTime()) / oneDay
+    );
+    message.reply(`There are ${daysUntilEaster} days until Easter!`);
+  }
+
+  // "days until 4th of july" command
+  if (msg === "days until 4th of july") {
+    const today = new Date();
+    const next4thOfJuly = new Date(today.getFullYear(), 6, 4);
+    if (today.getMonth() === 6 && today.getDate() > 4) {
+      next4thOfJuly.setFullYear(next4thOfJuly.getFullYear() + 1);
+    }
+    const oneDay = 1000 * 60 * 60 * 24;
+    const daysUntil4thOfJuly = Math.ceil(
+      365 + (next4thOfJuly.getTime() - today.getTime()) / oneDay
+    );
+    message.reply(`There are ${daysUntil4thOfJuly} days until 4th of July!`);
+  }
+
+  // "days until memorial day" command
+  if (msg === "days until memorial day") {
+    const today = new Date();
+    const nextMemorialDay = new Date(today.getFullYear(), 4, 31);
+    if (today.getMonth() === 4 && today.getDate() > 31) {
+      nextMemorialDay.setFullYear(nextMemorialDay.getFullYear() + 1);
+    }
+    const oneDay = 1000 * 60 * 60 * 24;
+    const daysUntilMemorialDay = Math.ceil(
+      365 + (nextMemorialDay.getTime() - today.getTime()) / oneDay
+    );
+    message.reply(`There are ${daysUntilMemorialDay} days until Memorial Day!`);
+  }
+
+  // ======================================================== //
+  // ======================================================== //
+  // TIME ZONES, WEATHER & LOCATION
+  // ======================================================== //
+  // ======================================================== //
 
   // get current date
-  if (message.content === "what is the date") {
+  if (msg === "what is the date") {
     const today = new Date();
     const date = today.getDate();
     const month = today.getMonth() + 1;
@@ -528,14 +629,8 @@ client.on("messageCreate", (message) => {
     message.reply(`Today is ${month}/${date}/${year}`);
   }
 
-  // ======================================================== //
-  // ======================================================== //
-  // TIME ZONES
-  // ======================================================== //
-  // ======================================================== //
-
   // get time in EST
-  if (message.content === "what time is it in EST") {
+  if (msg === "what time is it in EST") {
     const estTime = new Date().toLocaleString("en-US", {
       timeZone: "America/New_York",
     });
@@ -543,7 +638,7 @@ client.on("messageCreate", (message) => {
   }
 
   // get time in CST
-  if (message.content === "what time is it in CST") {
+  if (msg === "what time is it in CST") {
     const cstTime = new Date().toLocaleString("en-US", {
       timeZone: "America/Chicago",
     });
@@ -551,7 +646,7 @@ client.on("messageCreate", (message) => {
   }
 
   // get time in PST
-  if (message.content === "what time is it in PST") {
+  if (msg === "what time is it in PST") {
     const pstTime = new Date().toLocaleString("en-US", {
       timeZone: "America/Los_Angeles",
     });
@@ -559,7 +654,7 @@ client.on("messageCreate", (message) => {
   }
 
   // get time in MST
-  if (message.content === "what time is it in MST") {
+  if (msg === "what time is it in MST") {
     const mstTime = new Date().toLocaleString("en-US", {
       timeZone: "America/Denver",
     });
@@ -567,13 +662,9 @@ client.on("messageCreate", (message) => {
   }
 
   // show users ip address in a message
-  if (message.content === "where is my ip address located") {
-    const axios = require("axios");
+  if (msg === "where is my ip address located") {
     axios
-      .get(
-        `https://ipgeolocation.abstractapi.com/v1/?api_key=${IP_API_KEY}`
-        // "https://ipgeolocation.abstractapi.com/v1/?api_key=433722e6c1e640499d7284bdceb6fedc"
-      )
+      .get(`https://ipgeolocation.abstractapi.com/v1/?api_key=${IP_API_KEY}`)
       .then((response) => {
         console.log(response.data);
         message.reply(
@@ -585,9 +676,8 @@ client.on("messageCreate", (message) => {
       });
   }
 
-  // get IP address & return current weather using the IP information
-  if (message.content === "what is the weather like") {
-    const axios = require("axios");
+  // Current weather by user's location
+  if (msg === "what is the weather like") {
     axios
       .get(`https://ipgeolocation.abstractapi.com/v1/?api_key=${IP_API_KEY}`)
       .then((response) => {
@@ -665,30 +755,31 @@ client.on("messageCreate", (message) => {
 // ======================================================== //
 
 client.on("messageCreate", (message) => {
+  const msg = message.content.toLowerCase();
   const user = message.author;
 
   // Get user's avatar
-  if (message.content === "get my avatar") {
+  if (msg === "get my avatar") {
     message.reply(user.displayAvatarURL());
   }
 
   // Get user's username
-  if (message.content === "get my username") {
+  if (msg === "get my username") {
     message.reply(`Your username is: ${user.username}`);
   }
 
   // Get user's tag
-  if (message.content === "get my tag") {
+  if (msg === "get my tag") {
     message.reply(`Your user tag is: ${user.tag}`);
   }
 
   // Get user's ID
-  if (message.content === "get my ID") {
+  if (msg === "get my ID") {
     message.reply(`Your user ID is: ${user.id}`);
   }
 
   // Get user's status
-  if (message.content === "get my status") {
+  if (msg === "get my status") {
     if (user.presence.status === "online") {
       message.reply("You are online, duh!");
     } else if (user.presence.status === "idle") {
@@ -702,14 +793,14 @@ client.on("messageCreate", (message) => {
   }
 
   // Get user's nickname
-  if (message.content === "get my nickname") {
+  if (msg === "get my nickname") {
     if (!user.nickname) {
       message.reply("You don't have a nickname, silly.");
     } else message.reply(user.nickname);
   }
 
   // Get user's discriminator
-  if (message.content === "get my discriminator") {
+  if (msg === "get my discriminator") {
     message.reply(`Your user disciminator is: ${user.discriminator}`);
   }
 });
@@ -721,64 +812,66 @@ client.on("messageCreate", (message) => {
 // ======================================================== //
 
 client.on("messageCreate", (message) => {
+  const msg = message.content.toLowerCase();
+
   // Recommend Algorithm resources
-  if (message.content === "Recommend Algorithm resources") {
+  if (msg === "Recommend Algorithm resources") {
     message.reply(
       "https://www.youtube.com/watch?v=0IAPZzGSbME \n https://www.youtube.com/watch?v=9RHO6jU--GU \n https://www.youtube.com/watch?v=Qk0zUZW-U_M"
     );
   }
 
   // Recommend Data Structures resources
-  if (message.content === "Recommend Data Structures resources") {
+  if (msg === "Recommend Data Structures resources") {
     message.reply(
       "https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi"
     );
   }
 
   // Recommend React resources
-  if (message.content === "Recommend React resources") {
+  if (msg === "Recommend React resources") {
     message.reply(
       "https://www.youtube.com/playlist?list=PLZHQObOWTQDMsr9K-rj53DwVRMYO3t5Yr"
     );
   }
 
   // Recommend React Native resources
-  if (message.content === "Recommend React resources") {
+  if (msg === "Recommend React resources") {
     message.reply(
       "https://www.youtube.com/watch?v=Ke90Tje7VS0 \n https://www.youtube.com/watch?v=DLX62G4lc44 \n https://www.youtube.com/watch?v=DLX62G4lc44"
     );
   }
 
   // Recommend Node.js resources
-  if (message.content === "Recommend Node.js resources") {
+  if (msg === "Recommend Node.js resources") {
     message.reply(
       "https://www.youtube.com/playlist?list=PLZHQObOWTQDMsr9K-rj53DwVRMYO3t5Yr"
     );
   }
 
   // Recommend HTML/CSS resources
-  if (message.content === "Recommend HTML/CSS resources") {
+  if (msg === "Recommend HTML/CSS resources") {
     message.reply(
       "https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi"
     );
   }
 
   // Recommend JavaScript resources
-  if (message.content === "Recommend JavaScript resources") {
+  if (msg === "Recommend JavaScript resources") {
     message.reply(
       "https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi"
     );
   }
 
   // Recommend Python resources
-  if (message.content === "Recommend Python resources") {
+  if (msg === "Recommend Python resources") {
     message.reply(
       "https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi"
     );
   }
 
   // Recommend AI resources
-  if (message.content === "Recommend AI resources") {
+  if (msg === "Recommend AI resources") {
     message.reply(
       "Check out these resources: https://www.coursera.org/learn/machine-learning https://www.coursera.org/learn/convolutional-neural-networks https://www.coursera.org/learn/natural-language-processing-tensorflow https://www.coursera.org/learn/ai-for-everyone"
     );
