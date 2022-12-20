@@ -17,7 +17,11 @@ const fortunes = require("./jsonFiles/fortune.json");
 const eightBall = require("./jsonFiles/8ball.json");
 const quotes = require("./jsonFiles/quotes.json");
 const facts = require("./jsonFiles/facts.json");
-const { IP2Location } = require("ip2location-nodejs");
+// const { IP2Location } = require("ip2location-nodejs");
+
+// API keys
+const WEATHER_API_KEY = process.env.OPEN_WEATHER_API_KEY;
+const IP_API_KEY = process.env.IP_GEOLOCATION_API_KEY;
 
 const client = new Client({
   intents: [
@@ -72,39 +76,7 @@ function modUser(member) {
   member.roles.add(MODERATOR);
 }
 
-// Embed option 1
-// const exampleEmbed = new EmbedBuilder()
-//   .setColor(0x0099ff)
-//   .setTitle("Some title")
-//   .setURL("https://discord.js.org/")
-//   .setAuthor({
-//     name: "Some name",
-//     iconURL: "https://i.imgur.com/AfFp7pu.png",
-//     url: "https://discord.js.org",
-//   })
-//   .setDescription("Some description here")
-//   .setThumbnail("https://i.imgur.com/AfFp7pu.png")
-//   .addFields(
-//     { name: "Regular field title", value: "Some value here" },
-//     { name: "\u200B", value: "\u200B" },
-//     { name: "Inline field title", value: "Some value here", inline: true },
-//     { name: "Inline field title", value: "Some value here", inline: true }
-//   )
-//   .addFields({
-//     name: "Inline field title",
-//     value: "Some value here",
-//     inline: true,
-//   })
-//   .setImage("https://i.imgur.com/AfFp7pu.png")
-//   .setTimestamp()
-//   .setFooter({
-//     text: "Some footer text here",
-//     iconURL: "https://i.imgur.com/AfFp7pu.png",
-//   });
-
-// channel.send({ embeds: [exampleEmbed] });
-
-// Embed option 2
+// Embeded message
 const exampleEmbed = {
   color: 0x0099ff,
   title: "Wocka-Flocka Commands",
@@ -653,7 +625,8 @@ client.on("messageCreate", (message) => {
     const axios = require("axios");
     axios
       .get(
-        "https://ipgeolocation.abstractapi.com/v1/?api_key=433722e6c1e640499d7284bdceb6fedc"
+        `https://ipgeolocation.abstractapi.com/v1/?api_key=${IP_API_KEY}`
+        // "https://ipgeolocation.abstractapi.com/v1/?api_key=433722e6c1e640499d7284bdceb6fedc"
       )
       .then((response) => {
         console.log(response.data);
@@ -666,22 +639,13 @@ client.on("messageCreate", (message) => {
       });
   }
 
-  // get IP addreww & return current weather using the IP information
+  // get IP address & return current weather using the IP information
   if (message.content === "what is the weather like") {
     const axios = require("axios");
     axios
-      .get(
-        "https://ipgeolocation.abstractapi.com/v1/?api_key=433722e6c1e640499d7284bdceb6fedc"
-      )
+      .get(`https://ipgeolocation.abstractapi.com/v1/?api_key=${IP_API_KEY}`)
       .then((response) => {
-        // make response data object a string
-        function stringify(response) {
-          return JSON.stringify(response);
-        }
-        // pass new stringified response data object to a variable
-        const responseData = stringify(response.data);
-
-        console.log("LOCATION RESPONSE DATA: " + responseData);
+        console.log("LOCATION RESPONSE DATA: " + response.data.city);
         const city = response.data.city;
         const region = response.data.region;
         const country = response.data.country;
@@ -689,33 +653,25 @@ client.on("messageCreate", (message) => {
         const longitude = response.data.longitude;
         axios
           .get(
-            `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=45b75321eb653d4c02fcc9fc0bdd843c`
+            `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}&units=imperial`
           )
           .then((response) => {
-            // make response data object a string
-            function stringify(response) {
-              return JSON.stringify(response);
-            }
-            // pass new stringified response data object to a variable
-            const resData = stringify(response.data);
-
-            console.log("WEATHER RESPONSE DATA: " + resData);
+            console.log("WEATHER RESPONSE DATA: " + response.data.weather);
             const currentWeather = response.data.weather;
-            // console.log("CURRENT WEATHER: " + currentWeather);
-            const currentTemp = response.data.temp;
-            const currentFeelsLike = response.data.feels_like;
-            const currentWindSpeed = response.data.wind_speed;
-            const currentHumidity = response.data.humidity;
+            const currentTemp = response.data.main.temp;
+            const currentFeelsLike = response.data.main.feels_like;
+            const currentWindSpeed = response.data.wind.speed;
+            const currentHumidity = response.data.main.humidity;
             message.reply(
-              `The current weather in ${city}, ${region}, ${country} is ${currentWeather} with a temperature of ${currentTemp}°F, but it feels like ${currentFeelsLike}°F. The wind speed is ${currentWindSpeed} MPH with a humidity of ${currentHumidity}%.`
+              `The current weather in ${city}, ${region}, ${country} is ${currentWeather} with a temperature of ${currentTemp} °F, but it feels like ${currentFeelsLike} °F. The wind speed is ${currentWindSpeed} MPH with a humidity of ${currentHumidity}%. `
             );
           })
           .catch((error) => {
-            console.log("ERROR: " + error);
+            console.log("WEATHER ERROR: " + error);
           });
       })
       .catch((error) => {
-        console.log(error);
+        console.log("LOCATION ERROR: " + error);
       });
   }
 
