@@ -1,10 +1,15 @@
-// Wocka-Flocka-Bot
+/*                                                                                                                                      
+██╗    ██╗ ██████╗  ██████╗██╗  ██╗ █████╗       ███████╗██╗      ██████╗  ██████╗██╗  ██╗ █████╗     ██████╗  ██████╗ ████████╗
+██║    ██║██╔═══██╗██╔════╝██║ ██╔╝██╔══██╗      ██╔════╝██║     ██╔═══██╗██╔════╝██║ ██╔╝██╔══██╗    ██╔══██╗██╔═══██╗╚══██╔══╝
+██║ █╗ ██║██║   ██║██║     █████╔╝ ███████║█████╗█████╗  ██║     ██║   ██║██║     █████╔╝ ███████║    ██████╔╝██║   ██║   ██║   
+██║███╗██║██║   ██║██║     ██╔═██╗ ██╔══██║╚════╝██╔══╝  ██║     ██║   ██║██║     ██╔═██╗ ██╔══██║    ██╔══██╗██║   ██║   ██║   
+╚███╔███╔╝╚██████╔╝╚██████╗██║  ██╗██║  ██║      ██║     ███████╗╚██████╔╝╚██████╗██║  ██╗██║  ██║    ██████╔╝╚██████╔╝   ██║   
+ ╚══╝╚══╝  ╚═════╝  ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝      ╚═╝     ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝    ╚═════╝  ╚═════╝    ╚═╝   
+*/
 
 const cleverbot = require("cleverbot-free");
-const { Client, GatewayIntentBits } = require("discord.js");
+const { Client, GatewayIntentBits, EmbedBuilder } = require("discord.js");
 require("dotenv").config();
-
-const { EmbedBuilder } = require("discord.js");
 
 // JSON files
 const jokes = require("./jsonFiles/jokes.json");
@@ -12,6 +17,7 @@ const fortunes = require("./jsonFiles/fortune.json");
 const eightBall = require("./jsonFiles/8ball.json");
 const quotes = require("./jsonFiles/quotes.json");
 const facts = require("./jsonFiles/facts.json");
+const { IP2Location } = require("ip2location-nodejs");
 
 const client = new Client({
   intents: [
@@ -591,6 +597,8 @@ client.on("messageCreate", (message) => {
     message.reply(`There are ${daysUntilNewYears} days until New Years!`);
   }
 
+  // days until valentines day
+
   // get current date
   if (message.content === "what is the date") {
     const today = new Date();
@@ -600,7 +608,83 @@ client.on("messageCreate", (message) => {
     message.reply(`Today is ${month}/${date}/${year}`);
   }
 
-  // days until valentines day
+  // ======================================================== //
+  // ======================================================== //
+  // TIME ZONES
+  // ======================================================== //
+  // ======================================================== //
+
+  // get time in EST
+  if (message.content === "what time is it in EST") {
+    // get current time in EST
+    const estTime = new Date().toLocaleString("en-US", {
+      timeZone: "America/New_York",
+    });
+    message.reply(`It is currently ${estTime} in EST`);
+  }
+
+  // get time in PST
+  if (message.content === "what time is it in PST") {
+    // get current time in PST
+    const pstTime = new Date().toLocaleString("en-US", {
+      timeZone: "America/Los_Angeles",
+    });
+    message.reply(`It is currently ${pstTime} in PST`);
+  }
+
+  // get time in GMT
+  if (message.content === "what time is it in GMT") {
+    // get current time in GMT
+    const gmtTime = new Date().toLocaleString("en-US", {
+      timeZone: "Europe/London",
+    });
+    message.reply(`It is currently ${gmtTime} in GMT`);
+  }
+
+  // show users ip address in a message
+  if (message.content === "what is my ip address") {
+    const ip = require("ip");
+    const ipAddress = ip.address();
+    message.reply(`Your IP address is ${ipAddress}`);
+  }
+
+  // manually call axios request above
+  if (message.content === "where is my ip address located") {
+    const axios = require("axios");
+    axios
+      .get(
+        "https://ipgeolocation.abstractapi.com/v1/?api_key=433722e6c1e640499d7284bdceb6fedc"
+      )
+      .then((response) => {
+        console.log(response.data);
+        message.reply(
+          `Your IP address is located in ${response.data.city}, ${response.data.region}, ${response.data.country}`
+        );
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
+  // get current weather
+  if (message.content === "current weather") {
+    const ip = require("ip");
+    const ipLocation = require("ip2location-nodejs");
+    const ipAddress = ip.address();
+    const ipInfo = new ipLocation.IP2Location(ipAddress);
+    const city = ipInfo.city;
+    const state = ipInfo.region;
+    const country = ipInfo.countryName;
+    const weather = require("weather-js");
+    const location = `${city}, ${state}, ${country}`;
+    weather.find({ search: location, degreeType: "F" }, function (err, result) {
+      if (err) message.reply(err);
+      message.reply(
+        `The current weather in ${location} is ${result[0].current.skytext} with a temperature of ${result[0].current.temperature} degrees`
+      );
+    });
+  }
+  // }
 
   // // Automate Quote of the day that happens every 24 hours
   // const schedule = require("node-schedule");
