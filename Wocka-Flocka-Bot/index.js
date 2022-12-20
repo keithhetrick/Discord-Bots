@@ -79,7 +79,7 @@ function modUser(member) {
   member.roles.add(MODERATOR);
 }
 
-// Embeded message
+// Embeded Help message
 const helpMessageEmbed = {
   color: 0x0099ff,
   title: "Wocka-Flocka Commands",
@@ -93,17 +93,19 @@ const helpMessageEmbed = {
   thumbnail: {
     url: "https://i.imgur.com/AfFp7pu.png",
   },
-  // create an array of fields with current list of bot commands
-  // add colors to the field names in the embed
-
   fields: [
     {
       name: "!help",
       value: "List of avaliable commands",
     },
     {
+      name: "!resources",
+      value: "List of avaliable resources",
+    },
+    {
       name: "\u200b",
-      value: "\u200b",
+      // change line color
+      value: "**GAMES & FUN**",
       inline: false,
     },
     {
@@ -152,49 +154,100 @@ const helpMessageEmbed = {
     },
     {
       name: "\u200b",
-      value: "\u200b",
-      inline: false,
-    },
-    {
-      name: "HOLIDAY TRACKER",
-      value: "\u200b",
+      // make value bold
+      value: "**HOLIDAY TRACKER**",
       inline: false,
     },
     {
       name: "days until christmas",
       value: "Tells you how many days until Christmas",
+      inline: true,
+    },
+    {
+      name: "days until easter",
+      value: "Tells you how many days until Easter",
+      inline: true,
     },
     {
       name: "days until halloween",
       value: "Tells you how many days until Halloween",
+      inline: true,
+    },
+    {
+      name: "days until thanksgiving",
+      value: "Tells you how many days until Thanksgiving",
+      inline: true,
+    },
+    {
+      name: "days until valentines day",
+      value: "Tells you how many days until Valentines Day",
+      inline: true,
     },
     {
       name: "days until new years",
       value: "Tells you how many days until New Years Eve",
+      inline: true,
+    },
+    {
+      name: "days until 4th of july",
+      value: "Tells you how many days until the 4th of July",
+      inline: true,
+    },
+    {
+      name: "days until memorial day",
+      value: "Tells you how many days until Memorial Day",
+      inline: true,
     },
     {
       name: "\u200b",
-      value: "\u200b",
-      inline: false,
-    },
-    {
-      name: "WEATHER, TIME ZONE & LOCATION TRACKER",
-      value: "\u200b",
+      value: "**WEATHER, TIME ZONE & LOCATION TRACKER**",
       inline: false,
     },
     {
       name: "what is the weather like",
-      value: "Wocka-Flocka will tell you the weather",
+      value: "Wocka-Flocka will tell you the weather in your area",
     },
     {
       name: "what time is it in EST/CST/MST/PST (pick one)",
       value: "Wocka-Flocka will tell you the time in the selected time zone",
     },
-    {
-      name: "\u200b",
-      value: "\u200b",
-      inline: false,
-    },
+  ],
+  image: {
+    url: "https://i.imgur.com/AfFp7pu.png",
+  },
+  timestamp: new Date().toISOString(),
+  footer: {
+    text: "Bot creator: Keith Hetrick",
+    icon_url: "https://i.imgur.com/AfFp7pu.png",
+  },
+};
+const channel = client.channels.cache.get("1028135751508033676");
+// channel.send({ embeds: [helpMessageEmbed] });
+
+// call the !help command to get a list of commands
+client.on("messageCreate", async (message) => {
+  const msg = message.content.toLowerCase();
+
+  if (msg === "!help") {
+    await message.reply({ embeds: [helpMessageEmbed] });
+  }
+});
+
+// Embeded Help message
+const resourceMessageEmbeded = {
+  color: 0x0099ff,
+  title: "Wocka-Flocka Resouce List",
+  url: "https://discord.js.org",
+  author: {
+    name: "Wocka-Flocka",
+    icon_url: "https://i.imgur.com/AfFp7pu.png",
+    url: "https://discord.js.org",
+  },
+  description: "List of commands for Algorithm, Data Structures and more!",
+  thumbnail: {
+    url: "https://i.imgur.com/AfFp7pu.png",
+  },
+  fields: [
     {
       name: "Recommend Algorithm resources",
       value: "Wocka-Flocka will recommend Algorithm resources",
@@ -237,15 +290,13 @@ const helpMessageEmbed = {
     icon_url: "https://i.imgur.com/AfFp7pu.png",
   },
 };
-const channel = client.channels.cache.get("1028135751508033676");
-// channel.send({ embeds: [helpMessageEmbed] });
 
-// call the !help command to get a list of commands
+// call the !resources command to get a list of commands
 client.on("messageCreate", async (message) => {
   const msg = message.content.toLowerCase();
 
-  if (msg === "!help") {
-    await message.reply({ embeds: [helpMessageEmbed] });
+  if (msg === "!resources") {
+    await message.reply({ embeds: [resourceMessageEmbeded] });
   }
 });
 
